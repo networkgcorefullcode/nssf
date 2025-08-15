@@ -49,6 +49,9 @@ type Configuration struct {
 	AmfList                  []AmfConfig             `yaml:"amfList"`
 	TaList                   []TaConfig              `yaml:"taList"`
 	MappingListFromPlmn      []MappingFromPlmnConfig `yaml:"mappingListFromPlmn"`
+
+	// Manual Configuration to connect with network functions
+	ManualConfigs *ManualConfig `yaml:"manualConfigs,omitempty"`
 }
 
 type Sbi struct {
