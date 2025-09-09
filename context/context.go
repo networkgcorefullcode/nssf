@@ -48,17 +48,18 @@ func init() {
 }
 
 type NSSFContext struct {
-	NfId              string
-	Name              string
-	UriScheme         models.UriScheme
-	RegisterIPv4      string
-	BindingIPv4       string
-	Key               string
-	PEM               string
-	NfService         map[models.ServiceName]models.NfService
-	NrfUri            string
-	SupportedPlmnList []models.PlmnId
-	SBIPort           int
+	NfId         string
+	Name         string
+	UriScheme    models.UriScheme
+	RegisterIPv4 string
+	BindingIPv4  string
+	Key          string
+	PEM          string
+	NfService    map[models.ServiceName]models.NfService
+	NrfUri       string
+	SBIPort      int
+
+	ManualConfig *factory.ManualConfig
 }
 
 // Initialize NSSF context with configuration factory
@@ -104,7 +105,9 @@ func InitNssfContext() {
 		nssfContext.NrfUri = fmt.Sprintf("%s://%s:%d", nssfContext.UriScheme, "127.0.0.1", port)
 	}
 
-	nssfContext.SupportedPlmnList = nssfConfig.Configuration.SupportedPlmnList
+	if nssfConfig.Configuration.ManualConfigs != nil {
+		nssfContext.ManualConfig = nssfConfig.Configuration.ManualConfigs
+	}
 }
 
 func initNfService(serviceName []models.ServiceName, version string) (

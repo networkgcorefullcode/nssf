@@ -1,3 +1,4 @@
+// SPDX-FileCopyrightText: 2025 Canonical Ltd
 // Copyright 2019 free5GC.org
 //
 // SPDX-License-Identifier: Apache-2.0
@@ -78,50 +79,38 @@ func CheckSupportedSnssaiInPlmn(snssai models.Snssai, plmnId models.PlmnId) bool
 		return true
 	}
 
-	for _, supportedNssaiInPlmn := range factory.NssfConfig.Configuration.SupportedNssaiInPlmnList {
-		if *supportedNssaiInPlmn.PlmnId == plmnId {
-			for _, supportedSnssai := range supportedNssaiInPlmn.SupportedSnssaiList {
-				if CompareExtSnssai(snssai, supportedSnssai) {
-					return true
-				}
-			}
-			return false
-		}
+	supportedSnssaiList, found := factory.NssfConfig.Configuration.SupportedNssaiInPlmnList[plmnId]
+	if !found {
+		logger.Util.Warnf("no supported S-NSSAI list of PLMNID %+v in NSSF configuration", plmnId)
+		return false
 	}
-	logger.Util.Warnf("no supported S-NSSAI list of PLMNID %+v in NSSF configuration", plmnId)
-	return false
+	_, found = supportedSnssaiList[snssai]
+	return found
 }
 
 // Check whether S-NSSAIs in NSSAI are supported or not in PLMN
 func CheckSupportedNssaiInPlmn(nssai []models.Snssai, plmnId models.PlmnId) bool {
 	factory.ConfigLock.RLock()
 	defer factory.ConfigLock.RUnlock()
-	for _, supportedNssaiInPlmn := range factory.NssfConfig.Configuration.SupportedNssaiInPlmnList {
-		if *supportedNssaiInPlmn.PlmnId == plmnId {
-			for _, snssai := range nssai {
-				// Standard S-NSSAIs are supposed to be supported
-				// If not, disable following check and be sure to add supported standard S-NSSAI(s) in configuration
-				if CheckStandardSnssai(snssai) {
-					continue
-				}
 
-				hitSupportedNssai := false
-				for _, supportedSnssai := range supportedNssaiInPlmn.SupportedSnssaiList {
-					if CompareExtSnssai(snssai, supportedSnssai) {
-						hitSupportedNssai = true
-						break
-					}
-				}
+	supportedSnssaiList, found := factory.NssfConfig.Configuration.SupportedNssaiInPlmnList[plmnId]
+	if !found {
+		logger.Util.Warnf("no supported S-NSSAI list of PLMNID %+v in NSSF configuration", plmnId)
+		return false
+	}
 
-				if !hitSupportedNssai {
-					return false
-				}
-			}
-			return true
+	for _, snssai := range nssai {
+		// Standard S-NSSAIs are supposed to be supported
+		// If not, disable following check and be sure to add supported standard S-NSSAI(s) in configuration
+		if CheckStandardSnssai(snssai) {
+			continue
+		}
+		_, found = supportedSnssaiList[snssai]
+		if !found {
+			return false
 		}
 	}
-	logger.Util.Warnf("no supported S-NSSAI list of PLMNID %+v in NSSF configuration", plmnId)
-	return false
+	return true
 }
 
 // Check whether S-NSSAI is supported or not at UE's current TA
@@ -131,7 +120,7 @@ func CheckSupportedSnssaiInTa(snssai models.Snssai, tai models.Tai) bool {
 	for _, taConfig := range factory.NssfConfig.Configuration.TaList {
 		if reflect.DeepEqual(*taConfig.Tai, tai) {
 			for _, supportedSnssai := range taConfig.SupportedSnssaiList {
-				if CompareExtSnssai(supportedSnssai, snssai) {
+				if supportedSnssai == snssai {
 					return true
 				}
 			}
@@ -207,7 +196,7 @@ func CheckStandardSnssai(snssai models.Snssai) bool {
 // Check whether the NSSAI contains the specific S-NSSAI
 func CheckSnssaiInNssai(targetSnssai models.Snssai, nssai []models.Snssai) bool {
 	for _, snssai := range nssai {
-		if CompareExtSnssai(snssai, targetSnssai) {
+		if snssai == targetSnssai {
 			return true
 		}
 	}
@@ -231,7 +220,7 @@ func GetNsiInformationListFromConfig(snssai models.Snssai) []models.NsiInformati
 	factory.ConfigLock.RLock()
 	defer factory.ConfigLock.RUnlock()
 	for _, nsiConfig := range factory.NssfConfig.Configuration.NsiList {
-		if CompareExtSnssai(*nsiConfig.Snssai, snssai) {
+		if *nsiConfig.Snssai == snssai {
 			return nsiConfig.NsiInformationList
 		}
 	}
@@ -369,7 +358,7 @@ func FindMappingWithServingSnssai(
 	snssai models.Snssai, mappings []models.MappingOfSnssai,
 ) (models.MappingOfSnssai, bool) {
 	for _, mapping := range mappings {
-		if CompareExtSnssai(*mapping.ServingSnssai, snssai) {
+		if *mapping.ServingSnssai == snssai {
 			return mapping, true
 		}
 	}
@@ -379,7 +368,7 @@ func FindMappingWithServingSnssai(
 // Find target S-NSSAI mapping with home S-NSSAIs from mapping of S-NSSAI(s)
 func FindMappingWithHomeSnssai(snssai models.Snssai, mappings []models.MappingOfSnssai) (models.MappingOfSnssai, bool) {
 	for _, mapping := range mappings {
-		if CompareExtSnssai(*mapping.HomeSnssai, snssai) {
+		if *mapping.HomeSnssai == snssai {
 			return mapping, true
 		}
 	}

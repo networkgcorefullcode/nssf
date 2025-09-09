@@ -101,7 +101,7 @@ func useDefaultConfiguredNssai(
 
 		// Check whether the Default Configured S-NSSAI is subscribed
 		for _, subscribedSnssai := range param.SliceInfoRequestForRegistration.SubscribedNssai {
-			if util.CompareExtSnssai(requestedSnssai, *subscribedSnssai.SubscribedSnssai) {
+			if requestedSnssai == *subscribedSnssai.SubscribedSnssai {
 				var configuredSnssai models.ConfiguredSnssai
 				configuredSnssai.ConfiguredSnssai = new(models.Snssai)
 				*configuredSnssai.ConfiguredSnssai = requestedSnssai
@@ -347,7 +347,7 @@ func nsselectionForRegistration(param plugin.NsselectionQueryParameter,
 
 			hitSubscription := false
 			for _, subscribedSnssai := range param.SliceInfoRequestForRegistration.SubscribedNssai {
-				if util.CompareExtSnssai(mappingOfRequestedSnssai, *subscribedSnssai.SubscribedSnssai) {
+				if mappingOfRequestedSnssai == *subscribedSnssai.SubscribedSnssai {
 					// Requested S-NSSAI matches one of Subscribed S-NSSAI
 					// Add it to Allowed NSSAI list
 					hitSubscription = true
