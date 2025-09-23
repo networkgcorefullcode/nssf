@@ -22,6 +22,13 @@ RUN apt-get update && \
 RUN go install github.com/go-task/task/v3/cmd/task@latest
 
 WORKDIR $GOPATH/src/nssf
+
+COPY go.mod .
+COPY go.sum .
+COPY Taskfile.yml .
+
+RUN task mod-start
+
 COPY . .
 RUN task build
 
