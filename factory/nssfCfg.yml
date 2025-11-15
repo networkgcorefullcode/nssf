@@ -15,9 +15,9 @@ configuration:
     tls: # the local path of TLS key
       key: /support/TLS/nssf.key # NSSF TLS Private key
       pem: /support/TLS/nssf.pem # NSSF TLS Certificate
-  serviceNameList: # the SBI services provided by this NSSF
-    - nnssf-nsselection # Nnssf_NSSelection service
-    - nnssf-nssaiavailability # Nnssf_NSSAIAvailability service
+  serviceNameList:
+    - nnssf-nsselection
+    - nnssf-nssaiavailability
   nrfUri: http://localhost:29000 # a valid URI of NRF
   webuiUri: http://localhost:5001 # WebUI URI
   # supportedNssaiInPlmnList: [] # Supported NSSAI in PLMN list
@@ -26,13 +26,13 @@ configuration:
         sst: 1 # Slice/Service Type (uinteger, range: 0~255)
         sd: 010203 # Slice Differentiator (3 bytes hex string, range: 000000~FFFFFF)
       nsiInformationList:
-        - nrfId: http://localhost:8000/nnrf-nfm/v1/nf-instances
+        - nrfId: http://localhost:29000/nnrf-nfm/v1/nf-instances
           nsiId: 10
     - snssai:
         sst: 1
         sd: 112233
       nsiInformationList:
-        - nrfId: http://localhost:8000/nnrf-nfm/v1/nf-instances
+        - nrfId: http://localhost:29000/nnrf-nfm/v1/nf-instances
           nsiId: 11
   amfSetList: # AMF Set configurations
     - amfSetId: 1 # AMF Set ID
